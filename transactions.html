@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Transactions - Finance</title>
+    
+    <!-- Firebase App (Core) -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <!-- Firebase Authentication -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+    
+    <!-- CSS -->
+    <link rel="stylesheet" href="dashboard.css">
+    <link rel="stylesheet" href="transactions.css">
+</head>
+<body> 
+   <!-- Sidebar -->
+    <div class="sidebar" id="sidebar">
+        <div class="logo">
+            <div>
+                <h1>Finance</h1>
+                <p>Personal Tracker</p>
+            </div>
+        </div>
+
+        <nav class="nav-menu">
+            <div class="nav-item active" data-page="dashboard.html">
+                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"></path>
+                </svg>
+                Dashboard
+            </div>
+
+            <div class="nav-item" data-page="transactions.html">
+                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16V4m0 0L3 8m4-4l4 4m6 0v12m0 0l4-4m-4 4l-4-4"></path>
+                </svg>
+                Transactions
+            </div>
+
+            <div class="nav-item" data-page="analytics.html">
+                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
+                </svg>
+                Analytics
+            </div>
+
+            <div class="nav-item" data-page="settings.html">
+                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path>
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                </svg>
+                Settings
+            </div>
+        </nav>
+
+        <div class="sign-out" id="signOutBtn">
+            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" style="width: 20px; height: 20px;">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path>
+            </svg>
+            Sign Out
+        </div>
+    </div>
+
+    <!-- Mobile Menu Toggle -->
+    <button class="mobile-menu-toggle" id="mobileMenuToggle">
+        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" style="width: 24px; height: 24px;">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
+        </svg>
+    </button>
+
+    <!-- Main Content -->
+    <div class="main-content">
+        <!-- Header -->
+        <div class="header">
+            <div>
+                <h2>Transactions</h2>
+                <p class="subtitle">View and manage all your financial transactions</p>
+            </div>
+        </div>
+
+        <!-- Search and Filter Bar -->
+        <div class="filter-bar">
+            <div class="search-wrapper">
+                <label>Search</label>
+                <div class="search-input">
+                    <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+                    </svg>
+                    <input type="text" id="searchInput" placeholder="Search transactions...">
+                </div>
+            </div>
+
+            <div class="category-filter">
+                <label>Category</label>
+                <select id="categoryFilter">
+                    <option value="all">All Categories</option>
+                    <option value="salary">Salary</option>
+                    <option value="food">Food</option>
+                    <option value="entertainment">Entertainment</option>
+                    <option value="freelance">Freelance</option>
+                    <option value="transportation">Transportation</option>
+                </select>
+            </div>
+
+            <button class="add-btn" id="addTransactionBtn">
+                <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
+                </svg>
+                Add Transaction
+            </button>
+        </div>
+
+        <!-- Transactions List -->
+        <div class="transactions-container" id="transactionsList">
+            <!-- Transactions will be dynamically loaded here -->
+        </div>
+    </div>
+
+    <!-- Add Transaction Modal -->
+    <div class="modal" id="transactionModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Add Transaction</h3>
+                <button class="close-btn" id="closeModal">&times;</button>
+            </div>
+            <form id="transactionForm">
+                <div class="form-group">
+                    <label>Transaction Name</label>
+                    <input type="text" id="transactionName" placeholder="e.g., Coffee Shop" required>
+                </div>
+
+                <div class="form-group">
+                    <label>Amount</label>
+                    <input type="number" id="transactionAmount" placeholder="0.00" step="0.01" required>
+                </div>
+
+                <div class="form-group">
+                    <label>Category</label>
+                    <select id="transactionCategory" required>
+                        <option value="">Select category</option>
+                        <option value="salary">Salary</option>
+                        <option value="food">Food</option>
+                        <option value="entertainment">Entertainment</option>
+                        <option value="freelance">Freelance</option>
+                        <option value="transportation">Transportation</option>
+                        <option value="utilities">Utilities</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label>Type</label>
+                    <div class="radio-group">
+                        <label class="radio-label">
+                            <input type="radio" name="type" value="income" required>
+                            <span>Income</span>
+                        </label>
+                        <label class="radio-label">
+                            <input type="radio" name="type" value="expense" checked required>
+                            <span>Expense</span>
+                        </label>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>Date</label>
+                    <input type="date" id="transactionDate" required>
+                </div>
+
+                <button type="submit" class="submit-btn">Add Transaction</button>
+            </form>
+        </div>
+    </div>
+
+    <script src="transactions.js"></script>
+</body>
+</html>

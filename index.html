@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Finance - Sign In</title>
+    <link rel="stylesheet" href="style.css">
+    
+    <!-- Firebase App (Core) -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <!-- Firebase Authentication -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+</head>
+<body>
+    <div class="container">
+        <!-- Left Section (Desktop only) -->
+        <div class="left-section">
+            <div class="logo-container">
+                <div class="logo">
+                    <svg width="32" height="32" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M8 24L14 18L18 22L24 8" stroke="#10B981" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+                        <path d="M24 8L20 8L24 12" stroke="#10B981" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                </div>
+            </div>
+            <h1>Manage Your Money</h1>
+            <p class="subtitle">Track expenses, visualize spending patterns, and take control of your finances with our intuitive personal finance tracker.</p>
+            <ul class="features">
+                <li>Real-time expense tracking</li>
+                <li>Smart analytics & insights</li>
+                <li>Export & backup your data</li>
+            </ul>
+        </div>
+
+        <!-- Right Section (Form) -->
+        <div class="right-section">
+            <div class="mobile-header">
+                <div class="logo-container">
+                    <div class="logo">
+                        <svg width="32" height="32" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M8 24L14 18L18 22L24 8" stroke="#10B981" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+                            <path d="M24 8L20 8L24 12" stroke="#10B981" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+                        </svg>
+                    </div>
+                </div>
+                <h2>Finance</h2>
+            </div>
+
+            <div class="form-container">
+                <div class="tabs">
+                    <button class="tab active" id="signin-tab">Sign In</button>
+                    <button class="tab" id="signup-tab">Create Account</button>
+                </div>
+
+                <!-- Sign In Form -->
+                <form class="auth-form" id="signin-form">
+                    <div class="form-group">
+                        <label for="signin-email">Email</label>
+                        <div class="input-wrapper">
+                            <svg class="input-icon" width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <path d="M2.5 6.66667L9.0755 11.0504C9.63533 11.4236 10.3647 11.4236 10.9245 11.0504L17.5 6.66667M4.16667 15H15.8333C16.7538 15 17.5 14.2538 17.5 13.3333V6.66667C17.5 5.74619 16.7538 5 15.8333 5H4.16667C3.24619 5 2.5 5.74619 2.5 6.66667V13.3333C2.5 14.2538 3.24619 15 4.16667 15Z" stroke="#9CA3AF" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                            </svg>
+                            <input type="email" id="signin-email" placeholder="dam@gmail.com" required>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="signin-password">Password</label>
+                        <div class="input-wrapper">
+                            <svg class="input-icon" width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <path d="M5.83333 9.16667V6.66667C5.83333 4.36548 7.69881 2.5 10 2.5C12.3012 2.5 14.1667 4.36548 14.1667 6.66667V9.16667M10 11.6667V13.3333M6.66667 17.5H13.3333C14.2538 17.5 15 16.7538 15 15.8333V10.8333C15 9.91286 14.2538 9.16667 13.3333 9.16667H6.66667C5.74619 9.16667 5 9.91286 5 10.8333V15.8333C5 16.7538 5.74619 17.5 6.66667 17.5Z" stroke="#9CA3AF" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                            </svg>
+                            <input type="password" id="signin-password" placeholder="••••••••" required>
+                        </div>
+                    </div>
+
+                    <button type="submit" class="btn-primary">Sign In</button>
+
+                    <div class="divider">Or continue with</div>
+
+                    <button type="button" class="btn-google">
+                        <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M18.1711 8.36788H17.5V8.33329H9.99996V11.6666H14.7095C14.0225 13.607 12.1762 15 9.99996 15C7.23854 15 4.99996 12.7614 4.99996 9.99996C4.99996 7.23854 7.23854 4.99996 9.99996 4.99996C11.2745 4.99996 12.4341 5.48079 13.317 6.26621L15.674 3.90913C14.1858 2.52204 12.1933 1.66663 9.99996 1.66663C5.39788 1.66663 1.66663 5.39788 1.66663 9.99996C1.66663 14.602 5.39788 18.3333 9.99996 18.3333C14.602 18.3333 18.3333 14.602 18.3333 9.99996C18.3333 9.44121 18.2758 8.89579 18.1711 8.36788Z" fill="#FFC107"/>
+                            <path d="M2.62744 6.12121L5.36536 8.12954C6.10619 6.29537 7.90036 5.00004 9.99994 5.00004C11.2745 5.00004 12.4341 5.48087 13.317 6.26629L15.674 3.90921C14.1858 2.52212 12.1933 1.66671 9.99994 1.66671C6.79911 1.66671 4.02328 3.47371 2.62744 6.12121Z" fill="#FF3D00"/>
+                            <path d="M10 18.3334C12.1525 18.3334 14.1083 17.5096 15.5871 16.17L13.0079 13.9875C12.1431 14.6452 11.0864 15.0009 10 15C7.83249 15 5.99207 13.6179 5.29874 11.6892L2.58124 13.783C3.96041 16.4817 6.76124 18.3334 10 18.3334Z" fill="#4CAF50"/>
+                            <path d="M18.1713 8.36796H17.5V8.33337H10V11.6667H14.7096C14.3809 12.5902 13.7889 13.3972 13.0067 13.988L13.0079 13.9871L15.5871 16.1696C15.4046 16.3355 18.3333 14.1667 18.3333 10C18.3333 9.44129 18.2758 8.89587 18.1713 8.36796Z" fill="#1976D2"/>
+                        </svg>
+                        Google
+                    </button>
+                </form>
+
+                <!-- Sign Up Form -->
+                <form class="auth-form hidden" id="signup-form">
+                    <div class="form-group">
+                        <label for="signup-name">Full Name</label>
+                        <div class="input-wrapper">
+                            <svg class="input-icon" width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <path d="M10 10C12.0711 10 13.75 8.32107 13.75 6.25C13.75 4.17893 12.0711 2.5 10 2.5C7.92893 2.5 6.25 4.17893 6.25 6.25C6.25 8.32107 7.92893 10 10 10ZM10 10C6.54822 10 3.75 12.0147 3.75 14.5V17.5H16.25V14.5C16.25 12.0147 13.4518 10 10 10Z" stroke="#9CA3AF" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                            </svg>
+                            <input type="text" id="signup-name" placeholder="Enter names here..." required>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="signup-email">Email</label>
+                        <div class="input-wrapper">
+                            <svg class="input-icon" width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <path d="M2.5 6.66667L9.0755 11.0504C9.63533 11.4236 10.3647 11.4236 10.9245 11.0504L17.5 6.66667M4.16667 15H15.8333C16.7538 15 17.5 14.2538 17.5 13.3333V6.66667C17.5 5.74619 16.7538 5 15.8333 5H4.16667C3.24619 5 2.5 5.74619 2.5 6.66667V13.3333C2.5 14.2538 3.24619 15 4.16667 15Z" stroke="#9CA3AF" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                            </svg>
+                            <input type="email" id="signup-email" placeholder="email@gmail.com" required>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="signup-password">Password</label>
+                        <div class="input-wrapper">
+                            <svg class="input-icon" width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <path d="M5.83333 9.16667V6.66667C5.83333 4.36548 7.69881 2.5 10 2.5C12.3012 2.5 14.1667 4.36548 14.1667 6.66667V9.16667M10 11.6667V13.3333M6.66667 17.5H13.3333C14.2538 17.5 15 16.7538 15 15.8333V10.8333C15 9.91286 14.2538 9.16667 13.3333 9.16667H6.66667C5.74619 9.16667 5 9.91286 5 10.8333V15.8333C5 16.7538 5.74619 17.5 6.66667 17.5Z" stroke="#9CA3AF" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                            </svg>
+                            <input type="password" id="signup-password" placeholder="••••••••" required minlength="8">
+                        </div>
+                        <p class="input-hint">Password must be at least 8 characters long</p>
+                    </div>
+
+                    <button type="submit" class="btn-primary">Create Account</button>
+
+                    <p class="terms">By signing up, you agree to our <a href="#">Terms of Service</a> and <a href="#">Privacy Policy</a></p>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
