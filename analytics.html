@@ -3,22 +3,56 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Analytics - Finance</title>
+    <title>Analytics - Finance Tracker</title>
     
     <!-- Firebase App (Core) -->
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
     <!-- Firebase Authentication -->
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+    <!-- Firebase Firestore -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
     
     <!-- Chart.js -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     
     <!-- CSS -->
     <link rel="stylesheet" href="dashboard.css">
-    <link rel="stylesheet" href="analytics.css">
 </head>
+
+<style>
+    /* ================================
+   ANALYTICS PAGE — CHARTS ONLY
+   ================================ */
+.analytics-charts-row {
+    display: flex;
+    gap: 20px;
+    justify-content: space-between;
+    align-items: flex-start;
+    flex-wrap: nowrap;     /* force one row */
+    overflow-x: auto;      /* allow scroll on small screens */
+    padding: 10px 0;
+}
+
+.analytics-chart-card {
+    width: 280px;          /* smaller card */
+    min-width: 280px;      /* stays small in row */
+    height: 240px;
+    padding: 12px;
+    border-radius: 10px;
+    background: #fff;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+}
+
+.analytics-chart-card canvas {
+    width: 100% !important;
+    height: 170px !important;  /* reduced height */
+}
+
+</style>
 <body>
-    <!-- Sidebar -->
+    <!-- Sidebar Overlay for Mobile -->
+    <div class="sidebar-overlay" id="sidebarOverlay"></div>
+
     <!-- Sidebar -->
     <div class="sidebar" id="sidebar">
         <div class="logo">
@@ -29,7 +63,7 @@
         </div>
 
         <nav class="nav-menu">
-            <div class="nav-item active" data-page="dashboard.html">
+            <div class="nav-item" data-page="dashboard.html">
                 <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"></path>
                 </svg>
@@ -43,7 +77,14 @@
                 Transactions
             </div>
 
-            <div class="nav-item" data-page="analytics.html">
+            <div class="nav-item" data-page="categories.html">
+                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"></path>
+                </svg>
+                Categories
+            </div>
+
+            <div class="nav-item active" data-page="analytics.html">
                 <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
                 </svg>
@@ -82,20 +123,28 @@
                 <h2>Analytics</h2>
                 <p class="subtitle">Visualize your spending patterns and financial insights</p>
             </div>
+            <div class="user-info">
+                <div>
+                    <div class="user-name" id="userName">Loading...</div>
+                    <div class="user-email" id="userEmail">Loading...</div>
+                </div>
+                <div class="user-avatar" id="userAvatar">?</div>
+            </div>
         </div>
 
-        <!-- Top Stats -->
+        <!-- Stats Cards -->
         <div class="stats-grid">
             <div class="stat-card">
                 <div class="stat-header">
                     <span class="stat-label">Top Category</span>
                     <div class="stat-icon-small expense">
                         <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 17h8m0 0V9m0 8l-8-8-4 4-6-6"></path>
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"></path>
                         </svg>
                     </div>
                 </div>
-                <div class="stat-value">$450.00</div>
+                <div class="stat-value" id="topCategory">$0.00</div>
+                <p class="stat-subtitle" id="topCategoryName">No data</p>
             </div>
 
             <div class="stat-card">
@@ -107,7 +156,7 @@
                         </svg>
                     </div>
                 </div>
-                <div class="stat-value">$20,940.00</div>
+                <div class="stat-value" id="totalIncomeYTD">$0.00</div>
             </div>
 
             <div class="stat-card">
@@ -119,14 +168,14 @@
                         </svg>
                     </div>
                 </div>
-                <div class="stat-value">$10,606.00</div>
+                <div class="stat-value" id="totalExpenseYTD">$0.00</div>
             </div>
         </div>
 
         <!-- Charts Grid -->
-        <div class="charts-grid">
+        <div class="analytics-charts-grid">
             <!-- Income vs Expense Chart -->
-            <div class="chart-card full-width">
+            <div class="chart-card">
                 <h3>Income vs Expense</h3>
                 <canvas id="incomeExpenseChart"></canvas>
             </div>
@@ -134,7 +183,10 @@
             <!-- Spending by Category Chart -->
             <div class="chart-card">
                 <h3>Spending by Category</h3>
-                <canvas id="categoryChart"></canvas>
+                <div style="max-width: 400px; margin: 0 auto;">
+                    <canvas id="categoryPieChart"></canvas>
+                </div>
+                <div id="categoryLegend" style="margin-top: 20px;"></div>
             </div>
         </div>
 
@@ -143,16 +195,16 @@
             <h3>Summary</h3>
             <div class="summary-grid">
                 <div class="summary-card">
-                    <p class="summary-label">Savings Rate</p>
-                    <p class="summary-value savings-rate">52%</p>
+                    <div class="summary-label">Savings Rate</div>
+                    <div class="summary-value savings-rate" id="savingsRate">0%</div>
                 </div>
                 <div class="summary-card">
-                    <p class="summary-label">Average Monthly Expense</p>
-                    <p class="summary-value">$1,767.67</p>
+                    <div class="summary-label">Average Monthly Expense</div>
+                    <div class="summary-value" id="avgMonthlyExpense">$0.00</div>
                 </div>
                 <div class="summary-card">
-                    <p class="summary-label">Average Monthly Income</p>
-                    <p class="summary-value">$3,490.00</p>
+                    <div class="summary-label">Average Monthly Income</div>
+                    <div class="summary-value" id="avgMonthlyIncome">$0.00</div>
                 </div>
             </div>
         </div>
