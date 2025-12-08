@@ -514,7 +514,6 @@ body {
     border-bottom: 1px solid #f3f4f6;
     gap: 16px;
     transition: background-color 0.2s;
-    cursor: pointer;
 }
 
 .transaction-row:last-child {
@@ -629,7 +628,8 @@ body {
     background-color: #f3f4f6;
 }
 
-#transactionForm {
+#transactionForm,
+#categoryForm {
     padding: 24px;
 }
 
@@ -653,6 +653,7 @@ body {
 .form-group input[type="email"],
 .form-group input[type="number"],
 .form-group input[type="date"],
+.form-group input[type="color"],
 .form-group select {
     width: 100%;
     padding: 10px 12px;
@@ -770,6 +771,8 @@ body {
 .summary-value.savings-rate {
     color: #10b981;
 }
+
+
 
 /* ========================================
    SETTINGS PAGE
