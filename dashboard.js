@@ -11,244 +11,422 @@ const firebaseConfig = {
 };
 
 // Initialize Firebase
-firebase.initializeApp(firebaseConfig);
+if (!firebase.apps.length) {
+    firebase.initializeApp(firebaseConfig);
+}
 const auth = firebase.auth();
+const db = firebase.firestore();
+
+let currentUser = null;
+let balanceChart = null;
 
 // ---------------------
-// Check Authentication
+// Authentication Check
 // ---------------------
 auth.onAuthStateChanged((user) => {
     if (user) {
-        console.log('✅ User is signed in:', user.email);
-        
-        // Update user info in header
-        const userName = document.getElementById('userName');
-        const userEmail = document.getElementById('userEmail');
-        const userAvatar = document.getElementById('userAvatar');
-        
-        if (userName) userName.textContent = user.displayName || 'User';
-        if (userEmail) userEmail.textContent = user.email;
-        
-        // Update avatar with initials
-        if (userAvatar && user.displayName) {
-            const initials = user.displayName
-                .split(' ')
-                .map(n => n[0])
-                .join('')
-                .toUpperCase()
-                .slice(0, 2);
-            userAvatar.textContent = initials;
-        } else if (userAvatar && user.email) {
-            userAvatar.textContent = user.email.slice(0, 2).toUpperCase();
-        }
+        currentUser = user;
+        console.log('User logged in:', user.email);
+        displayUserInfo(user);
+        loadDashboardData();
     } else {
-        console.log('❌ No user signed in, redirecting to login...');
+        console.log('No user logged in, redirecting...');
         window.location.href = 'index.html';
     }
 });
 
 // ---------------------
-// Sign Out Functionality
+// Display User Info
 // ---------------------
-const signOutBtn = document.getElementById('signOutBtn');
-if (signOutBtn) {
-    signOutBtn.addEventListener('click', () => {
-        if (confirm('Are you sure you want to sign out?')) {
-            auth.signOut()
-                .then(() => {
-                    console.log('✅ User signed out successfully');
-                    alert('You have been signed out successfully!');
-                    window.location.href = 'index.html';
-                })
-                .catch((error) => {
-                    console.error('Sign out error:', error);
-                    alert('Error signing out: ' + error.message);
-                });
-        }
-    });
+function displayUserInfo(user) {
+    const userName = document.getElementById('userName');
+    const userEmail = document.getElementById('userEmail');
+    const userAvatar = document.getElementById('userAvatar');
+
+    userName.textContent = user.displayName || 'User';
+    userEmail.textContent = user.email;
+    
+    const initials = user.displayName 
+        ? user.displayName.split(' ').map(n => n[0]).join('').toUpperCase().substring(0, 2)
+        : user.email[0].toUpperCase();
+    userAvatar.textContent = initials;
 }
 
 // ---------------------
-// Navigation Items
+// Navigation
 // ---------------------
-const navItems = document.querySelectorAll('.nav-item');
-
-navItems.forEach(item => {
-    item.addEventListener('click', function() {
-        const page = this.getAttribute('data-page');
+document.querySelectorAll('.nav-item').forEach(item => {
+    item.addEventListener('click', () => {
+        const page = item.getAttribute('data-page');
         if (page) {
             window.location.href = page;
         }
     });
 });
 
-// ---------------------
-// Mobile Menu Toggle
-// ---------------------
+// Mobile menu toggle
 const mobileMenuToggle = document.getElementById('mobileMenuToggle');
 const sidebar = document.getElementById('sidebar');
-let sidebarOverlay = null;
+const sidebarOverlay = document.getElementById('sidebarOverlay');
 
-function createOverlay() {
-    if (!sidebarOverlay) {
-        sidebarOverlay = document.createElement('div');
-        sidebarOverlay.className = 'sidebar-overlay';
-        document.body.appendChild(sidebarOverlay);
-        
-        sidebarOverlay.addEventListener('click', closeMobileMenu);
-    }
-}
+mobileMenuToggle.addEventListener('click', () => {
+    sidebar.classList.toggle('open');
+    sidebarOverlay.classList.toggle('active');
+    document.body.classList.toggle('menu-open');
+});
 
-function openMobileMenu() {
-    createOverlay();
-    sidebar.classList.add('open');
-    sidebarOverlay.classList.add('active');
-    document.body.classList.add('menu-open');
-}
-
-function closeMobileMenu() {
+sidebarOverlay.addEventListener('click', () => {
     sidebar.classList.remove('open');
-    if (sidebarOverlay) {
-        sidebarOverlay.classList.remove('active');
-    }
+    sidebarOverlay.classList.remove('active');
     document.body.classList.remove('menu-open');
-}
+});
 
-if (mobileMenuToggle) {
-    mobileMenuToggle.addEventListener('click', () => {
-        if (sidebar.classList.contains('open')) {
-            closeMobileMenu();
-        } else {
-            openMobileMenu();
-        }
-    });
-}
-
-// Close menu when clicking outside on mobile
-document.addEventListener('click', (e) => {
-    if (window.innerWidth <= 768) {
-        if (!sidebar.contains(e.target) && 
-            !mobileMenuToggle.contains(e.target) && 
-            sidebar.classList.contains('open')) {
-            closeMobileMenu();
-        }
+// Sign Out
+document.getElementById('signOutBtn').addEventListener('click', () => {
+    if (confirm('Are you sure you want to sign out?')) {
+        auth.signOut().then(() => {
+            console.log('User signed out');
+            window.location.href = 'index.html';
+        }).catch((error) => {
+            console.error('Error signing out:', error);
+            alert('Error signing out. Please try again.');
+        });
     }
 });
 
 // ---------------------
-// Balance Trend Chart
+// Load Dashboard Data
 // ---------------------
-const ctx = document.getElementById('balanceChart');
-if (ctx) {
-    const balanceChart = new Chart(ctx.getContext('2d'), {
-        type: 'line',
-        data: {
-            labels: ['Jan 1', 'Jan 5', 'Jan 10', 'Jan 15', 'Jan 20', 'Jan 25', 'Today'],
-            datasets: [{
-                label: 'Balance',
-                data: [2500, 2300, 2250, 3000, 2100, 2200, 2800],
-                borderColor: '#10b981',
-                backgroundColor: 'rgba(16, 185, 129, 0.1)',
-                tension: 0.4,
-                fill: true,
-                pointRadius: 0,
-                pointHoverRadius: 6,
-                borderWidth: 2
-            }]
-        },
-        options: {
-            responsive: true,
-            maintainAspectRatio: true,
-            aspectRatio: window.innerWidth < 768 ? 1.5 : 3,
-            plugins: {
-                legend: {
-                    display: false
-                },
-                tooltip: {
-                    mode: 'index',
-                    intersect: false,
-                    backgroundColor: 'rgba(0, 0, 0, 0.8)',
-                    padding: 12,
-                    cornerRadius: 8,
-                    titleFont: {
-                        size: 14
-                    },
-                    bodyFont: {
-                        size: 16,
-                        weight: 'bold'
-                    },
-                    callbacks: {
-                        label: function(context) {
-                            return '$' + context.parsed.y.toLocaleString();
-                        }
-                    }
+async function loadDashboardData() {
+    try {
+        await loadCategories();
+        await loadTransactions();
+        await calculateStats();
+        await loadBalanceChart();
+    } catch (error) {
+        console.error('Error loading dashboard data:', error);
+    }
+}
+
+// Load Categories for dropdown
+async function loadCategories() {
+    try {
+        const categoriesSnapshot = await db.collection('categories')
+            .where('userId', '==', currentUser.uid)
+            .get();
+
+        const categorySelect = document.getElementById('category');
+        categorySelect.innerHTML = '<option value="">Select category</option>';
+
+        categoriesSnapshot.forEach(doc => {
+            const category = doc.data();
+            const option = document.createElement('option');
+            option.value = doc.id;
+            option.textContent = category.name;
+            option.setAttribute('data-type', category.type);
+            categorySelect.appendChild(option);
+        });
+
+        // Filter categories based on transaction type
+        const typeRadios = document.querySelectorAll('input[name="type"]');
+        typeRadios.forEach(radio => {
+            radio.addEventListener('change', filterCategoriesByType);
+        });
+        filterCategoriesByType();
+    } catch (error) {
+        console.error('Error loading categories:', error);
+    }
+}
+
+function filterCategoriesByType() {
+    const selectedType = document.querySelector('input[name="type"]:checked').value;
+    const categorySelect = document.getElementById('category');
+    const options = categorySelect.querySelectorAll('option');
+
+    options.forEach(option => {
+        if (option.value === '') {
+            option.style.display = 'block';
+            return;
+        }
+        const optionType = option.getAttribute('data-type');
+        option.style.display = optionType === selectedType ? 'block' : 'none';
+    });
+
+    // Reset selection if current selection doesn't match type
+    if (categorySelect.value) {
+        const selectedOption = categorySelect.options[categorySelect.selectedIndex];
+        const selectedOptionType = selectedOption.getAttribute('data-type');
+        if (selectedOptionType !== selectedType) {
+            categorySelect.value = '';
+        }
+    }
+}
+
+// Load Transactions
+async function loadTransactions() {
+    try {
+        const transactionsSnapshot = await db.collection('transactions')
+            .where('userId', '==', currentUser.uid)
+            .orderBy('date', 'desc')
+            .limit(5)
+            .get();
+
+        const transactionsList = document.getElementById('recentTransactionsList');
+        
+        if (transactionsSnapshot.empty) {
+            transactionsList.innerHTML = `
+                <div class="empty-state">
+                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4"></path>
+                    </svg>
+                    <p>No transactions yet. Add your first transaction!</p>
+                </div>
+            `;
+            return;
+        }
+
+        transactionsList.innerHTML = '';
+
+        for (const doc of transactionsSnapshot.docs) {
+            const transaction = doc.data();
+            const categoryDoc = await db.collection('categories').doc(transaction.categoryId).get();
+            const categoryName = categoryDoc.exists ? categoryDoc.data().name : 'Unknown';
+
+            const item = document.createElement('div');
+            item.className = 'transaction-item';
+            item.innerHTML = `
+                <div class="transaction-icon ${transaction.type}">
+                    ${transaction.type === 'income' ? '📈' : '💰'}
+                </div>
+                <div class="transaction-details">
+                    <div class="transaction-name">${transaction.description}</div>
+                    <div class="transaction-category">${categoryName}</div>
+                </div>
+                <div class="transaction-right">
+                    <div class="transaction-amount ${transaction.type}">
+                        ${transaction.type === 'income' ? '+' : '-'}$${parseFloat(transaction.amount).toFixed(2)}
+                    </div>
+                    <div class="transaction-date">${formatDate(transaction.date)}</div>
+                </div>
+            `;
+            transactionsList.appendChild(item);
+        }
+    } catch (error) {
+        console.error('Error loading transactions:', error);
+    }
+}
+
+// Calculate Stats
+async function calculateStats() {
+    try {
+        const now = new Date();
+        const firstDay = new Date(now.getFullYear(), now.getMonth(), 1);
+        const lastDay = new Date(now.getFullYear(), now.getMonth() + 1, 0);
+
+        const transactionsSnapshot = await db.collection('transactions')
+            .where('userId', '==', currentUser.uid)
+            .get();
+
+        let totalBalance = 0;
+        let monthIncome = 0;
+        let monthExpense = 0;
+
+        transactionsSnapshot.forEach(doc => {
+            const transaction = doc.data();
+            const amount = parseFloat(transaction.amount);
+            const transactionDate = transaction.date.toDate();
+
+            if (transaction.type === 'income') {
+                totalBalance += amount;
+                if (transactionDate >= firstDay && transactionDate <= lastDay) {
+                    monthIncome += amount;
                 }
+            } else {
+                totalBalance -= amount;
+                if (transactionDate >= firstDay && transactionDate <= lastDay) {
+                    monthExpense += amount;
+                }
+            }
+        });
+
+        document.getElementById('totalBalance').textContent = `$${totalBalance.toFixed(2)}`;
+        document.getElementById('monthIncome').textContent = `$${monthIncome.toFixed(2)}`;
+        document.getElementById('monthExpense').textContent = `$${monthExpense.toFixed(2)}`;
+    } catch (error) {
+        console.error('Error calculating stats:', error);
+    }
+}
+
+// Load Balance Chart
+async function loadBalanceChart() {
+    try {
+        const transactionsSnapshot = await db.collection('transactions')
+            .where('userId', '==', currentUser.uid)
+            .orderBy('date', 'asc')
+            .get();
+
+        const dataPoints = [];
+        let runningBalance = 0;
+
+        transactionsSnapshot.forEach(doc => {
+            const transaction = doc.data();
+            const amount = parseFloat(transaction.amount);
+            
+            if (transaction.type === 'income') {
+                runningBalance += amount;
+            } else {
+                runningBalance -= amount;
+            }
+
+            dataPoints.push({
+                date: transaction.date.toDate(),
+                balance: runningBalance
+            });
+        });
+
+        // Group by day and take the last balance of each day
+        const dailyBalances = {};
+        dataPoints.forEach(point => {
+            const dateKey = point.date.toISOString().split('T')[0];
+            dailyBalances[dateKey] = point.balance;
+        });
+
+        const labels = Object.keys(dailyBalances).slice(-30); // Last 30 days
+        const data = labels.map(date => dailyBalances[date]);
+
+        const ctx = document.getElementById('balanceChart').getContext('2d');
+        
+        if (balanceChart) {
+            balanceChart.destroy();
+        }
+
+        balanceChart = new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: labels.map(date => {
+                    const d = new Date(date);
+                    return `${d.getMonth() + 1}/${d.getDate()}`;
+                }),
+                datasets: [{
+                    label: 'Balance',
+                    data: data,
+                    borderColor: '#10b981',
+                    backgroundColor: 'rgba(16, 185, 129, 0.1)',
+                    tension: 0.4,
+                    fill: true
+                }]
             },
-            scales: {
-                y: {
-                    beginAtZero: false,
-                    min: 0,
-                    max: 3000,
-                    ticks: {
-                        callback: function(value) {
-                            return value;
-                        },
-                        color: '#9ca3af',
-                        font: {
-                            size: window.innerWidth < 768 ? 10 : 12
-                        }
-                    },
-                    grid: {
-                        color: '#f3f4f6',
-                        drawBorder: false
-                    }
-                },
-                x: {
-                    ticks: {
-                        color: '#9ca3af',
-                        font: {
-                            size: window.innerWidth < 768 ? 10 : 12
-                        }
-                    },
-                    grid: {
+            options: {
+                responsive: true,
+                maintainAspectRatio: true,
+                plugins: {
+                    legend: {
                         display: false
                     }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: false,
+                        ticks: {
+                            callback: function(value) {
+                                return '$' + value.toFixed(0);
+                            }
+                        }
+                    }
                 }
-            },
-            interaction: {
-                mode: 'nearest',
-                axis: 'x',
-                intersect: false
             }
+        });
+    } catch (error) {
+        console.error('Error loading balance chart:', error);
+    }
+}
+
+// ---------------------
+// Transaction Modal
+// ---------------------
+const transactionModal = document.getElementById('transactionModal');
+const addTransactionBtn = document.getElementById('addTransactionBtn');
+const closeModal = document.getElementById('closeModal');
+const transactionForm = document.getElementById('transactionForm');
+
+addTransactionBtn.addEventListener('click', openAddTransactionModal);
+closeModal.addEventListener('click', closeTransactionModal);
+
+transactionModal.addEventListener('click', (e) => {
+    if (e.target === transactionModal) {
+        closeTransactionModal();
+    }
+});
+
+function openAddTransactionModal() {
+    document.getElementById('modalTitle').textContent = 'Add Transaction';
+    transactionForm.reset();
+    document.getElementById('transactionId').value = '';
+    document.getElementById('date').valueAsDate = new Date();
+    transactionModal.classList.add('active');
+}
+
+function closeTransactionModal() {
+    transactionModal.classList.remove('active');
+}
+
+// Submit Transaction Form
+transactionForm.addEventListener('submit', async (e) => {
+    e.preventDefault();
+
+    const type = document.querySelector('input[name="type"]:checked').value;
+    const description = document.getElementById('description').value.trim();
+    const amount = parseFloat(document.getElementById('amount').value);
+    const categoryId = document.getElementById('category').value;
+    const date = new Date(document.getElementById('date').value);
+    const transactionId = document.getElementById('transactionId').value;
+
+    if (!categoryId) {
+        alert('Please select a category');
+        return;
+    }
+
+    const transactionData = {
+        userId: currentUser.uid,
+        type,
+        description,
+        amount,
+        categoryId,
+        date: firebase.firestore.Timestamp.fromDate(date),
+        updatedAt: firebase.firestore.Timestamp.now()
+    };
+
+    try {
+        if (transactionId) {
+            await db.collection('transactions').doc(transactionId).update(transactionData);
+            alert('Transaction updated successfully!');
+        } else {
+            transactionData.createdAt = firebase.firestore.Timestamp.now();
+            await db.collection('transactions').add(transactionData);
+            alert('Transaction added successfully!');
         }
-    });
 
-    // Update chart on window resize
-    let resizeTimer;
-    window.addEventListener('resize', () => {
-        clearTimeout(resizeTimer);
-        resizeTimer = setTimeout(() => {
-            balanceChart.options.aspectRatio = window.innerWidth < 768 ? 1.5 : 3;
-            balanceChart.options.scales.y.ticks.font.size = window.innerWidth < 768 ? 10 : 12;
-            balanceChart.options.scales.x.ticks.font.size = window.innerWidth < 768 ? 10 : 12;
-            balanceChart.update();
-        }, 250);
-    });
+        closeTransactionModal();
+        await loadDashboardData();
+    } catch (error) {
+        console.error('Error saving transaction:', error);
+        alert('Error saving transaction. Please try again.');
+    }
+});
+
+// ---------------------
+// Utility Functions
+// ---------------------
+function formatDate(timestamp) {
+    const date = timestamp.toDate();
+    const now = new Date();
+    const diffTime = Math.abs(now - date);
+    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+
+    if (diffDays === 0) return 'Today';
+    if (diffDays === 1) return 'Yesterday';
+    if (diffDays < 7) return `${diffDays} days ago`;
+
+    const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+    return `${months[date.getMonth()]} ${date.getDate()}`;
 }
-
-// ---------------------
-// Add Transaction Button
-// ---------------------
-const addTransactionBtn = document.querySelector('.add-transaction-btn');
-if (addTransactionBtn) {
-    addTransactionBtn.addEventListener('click', () => {
-        window.location.href = 'transactions.html';
-    });
-}
-
-// ---------------------
-// Console Info
-// ---------------------
-console.log('🎨 Dashboard loaded successfully!');
-console.log('📱 Viewport width:', window.innerWidth);
-console.log('🔥 Firebase initialized:', firebase.apps.length > 0);
