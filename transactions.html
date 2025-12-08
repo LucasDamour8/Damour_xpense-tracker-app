@@ -3,19 +3,23 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Transactions - Finance</title>
+    <title>Transactions - Finance Tracker</title>
     
     <!-- Firebase App (Core) -->
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
     <!-- Firebase Authentication -->
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+    <!-- Firebase Firestore -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
     
     <!-- CSS -->
     <link rel="stylesheet" href="dashboard.css">
-    <link rel="stylesheet" href="transactions.css">
 </head>
-<body> 
-   <!-- Sidebar -->
+<body>
+    <!-- Sidebar Overlay for Mobile -->
+    <div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+    <!-- Sidebar -->
     <div class="sidebar" id="sidebar">
         <div class="logo">
             <div>
@@ -25,18 +29,25 @@
         </div>
 
         <nav class="nav-menu">
-            <div class="nav-item active" data-page="dashboard.html">
+            <div class="nav-item" data-page="dashboard.html">
                 <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"></path>
                 </svg>
                 Dashboard
             </div>
 
-            <div class="nav-item" data-page="transactions.html">
+            <div class="nav-item active" data-page="transactions.html">
                 <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16V4m0 0L3 8m4-4l4 4m6 0v12m0 0l4-4m-4 4l-4-4"></path>
                 </svg>
                 Transactions
+            </div>
+
+            <div class="nav-item" data-page="categories.html">
+                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"></path>
+                </svg>
+                Categories
             </div>
 
             <div class="nav-item" data-page="analytics.html">
@@ -76,16 +87,23 @@
         <div class="header">
             <div>
                 <h2>Transactions</h2>
-                <p class="subtitle">View and manage all your financial transactions</p>
+                <p class="subtitle">View and manage all your transactions</p>
+            </div>
+            <div class="user-info">
+                <div>
+                    <div class="user-name" id="userName">Loading...</div>
+                    <div class="user-email" id="userEmail">Loading...</div>
+                </div>
+                <div class="user-avatar" id="userAvatar">?</div>
             </div>
         </div>
 
-        <!-- Search and Filter Bar -->
+        <!-- Filter Bar -->
         <div class="filter-bar">
             <div class="search-wrapper">
                 <label>Search</label>
                 <div class="search-input">
-                    <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
                     </svg>
                     <input type="text" id="searchInput" placeholder="Search transactions...">
@@ -93,14 +111,11 @@
             </div>
 
             <div class="category-filter">
-                <label>Category</label>
-                <select id="categoryFilter">
-                    <option value="all">All Categories</option>
-                    <option value="salary">Salary</option>
-                    <option value="food">Food</option>
-                    <option value="entertainment">Entertainment</option>
-                    <option value="freelance">Freelance</option>
-                    <option value="transportation">Transportation</option>
+                <label>Filter by Type</label>
+                <select id="filterType">
+                    <option value="all">All Types</option>
+                    <option value="income">Income</option>
+                    <option value="expense">Expense</option>
                 </select>
             </div>
 
@@ -114,61 +129,62 @@
 
         <!-- Transactions List -->
         <div class="transactions-container" id="transactionsList">
-            <!-- Transactions will be dynamically loaded here -->
+            <div class="empty-state">
+                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4"></path>
+                </svg>
+                <p>No transactions found</p>
+            </div>
         </div>
     </div>
 
-    <!-- Add Transaction Modal -->
+    <!-- Add/Edit Transaction Modal -->
     <div class="modal" id="transactionModal">
         <div class="modal-content">
             <div class="modal-header">
-                <h3>Add Transaction</h3>
+                <h3 id="modalTitle">Add Transaction</h3>
                 <button class="close-btn" id="closeModal">&times;</button>
             </div>
             <form id="transactionForm">
-                <div class="form-group">
-                    <label>Transaction Name</label>
-                    <input type="text" id="transactionName" placeholder="e.g., Coffee Shop" required>
-                </div>
-
-                <div class="form-group">
-                    <label>Amount</label>
-                    <input type="number" id="transactionAmount" placeholder="0.00" step="0.01" required>
-                </div>
-
-                <div class="form-group">
-                    <label>Category</label>
-                    <select id="transactionCategory" required>
-                        <option value="">Select category</option>
-                        <option value="salary">Salary</option>
-                        <option value="food">Food</option>
-                        <option value="entertainment">Entertainment</option>
-                        <option value="freelance">Freelance</option>
-                        <option value="transportation">Transportation</option>
-                        <option value="utilities">Utilities</option>
-                    </select>
-                </div>
-
+                <input type="hidden" id="transactionId">
+                
                 <div class="form-group">
                     <label>Type</label>
                     <div class="radio-group">
                         <label class="radio-label">
-                            <input type="radio" name="type" value="income" required>
+                            <input type="radio" name="type" value="income" checked>
                             <span>Income</span>
                         </label>
                         <label class="radio-label">
-                            <input type="radio" name="type" value="expense" checked required>
+                            <input type="radio" name="type" value="expense">
                             <span>Expense</span>
                         </label>
                     </div>
                 </div>
 
                 <div class="form-group">
-                    <label>Date</label>
-                    <input type="date" id="transactionDate" required>
+                    <label for="description">Description</label>
+                    <input type="text" id="description" required placeholder="e.g., Monthly Salary">
                 </div>
 
-                <button type="submit" class="submit-btn">Add Transaction</button>
+                <div class="form-group">
+                    <label for="amount">Amount ($)</label>
+                    <input type="number" id="amount" step="0.01" min="0" required placeholder="0.00">
+                </div>
+
+                <div class="form-group">
+                    <label for="category">Category</label>
+                    <select id="category" required>
+                        <option value="">Select category</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="date">Date</label>
+                    <input type="date" id="date" required>
+                </div>
+
+                <button type="submit" class="submit-btn">Save Transaction</button>
             </form>
         </div>
     </div>
