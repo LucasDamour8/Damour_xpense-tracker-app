@@ -48,6 +48,44 @@
     height: 170px !important;  /* reduced height */
 }
 
+.chart-card {
+    width: 48%;
+    max-width: 600px;
+    background-color: #fff;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    padding: 20px;
+    margin-bottom: 10px; /* Reduced margin */
+}
+
+.chart-card h3 {
+    font-size: 18px;
+    font-weight: 600;
+    margin-bottom: 16px;
+}
+
+.analytics-charts-grid {
+    display: flex;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 10px; /* Reduced gap */
+}
+
+#incomeExpenseChart, #categoryPieChart {
+    width: 100% !important;
+    max-width: 500px;
+    height: 300px !important;
+    margin: 0 auto;
+}
+
+@media (max-width: 768px) {
+    .chart-card {
+        width: 100%;
+    }
+    .analytics-charts-grid {
+        gap: 2px;
+    }
+}
 </style>
 <body>
     <!-- Sidebar Overlay for Mobile -->
